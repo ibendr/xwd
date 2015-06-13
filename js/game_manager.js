@@ -20,9 +20,13 @@ function GameManager(/*size, blocks,*/ xwd, target, InputManager, Actuator, Stor
 
   this.startTiles     = 2;
   this.cheatEnabled   = true;
-  this.inputManager.on("move", this.move.bind(this));
-  this.inputManager.on("insert", this.insert.bind(this));
-  this.inputManager.on("restart", this.restart.bind(this));
+  this.inputManager.on("move",        this.move.bind(       this));
+  this.inputManager.on("home",        this.home.bind(       this));
+  this.inputManager.on("end",         this.end.bind(        this));
+  this.inputManager.on("nextSpot",    this.nextSpot.bind(   this));
+  this.inputManager.on("insert",      this.insert.bind(     this));
+  this.inputManager.on("restart",     this.restart.bind(    this));
+  this.inputManager.on("solve",       this.solve.bind(      this));
   this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
 
   this.setup();
@@ -32,8 +36,47 @@ function GameManager(/*size, blocks,*/ xwd, target, InputManager, Actuator, Stor
 GameManager.prototype.restart = function () {
   this.storageManager.clearGameState();
   this.actuator.continueGame(); // Clear the game won/lost message
+  showSolution = false;
   this.setup();
 };
+
+// Solve the puzzle (show the solution)
+GameManager.prototype.solve = function () {
+  this.storageManager.clearGameState();
+  this.actuator.continueGame(); // Clear the game won/lost message
+  showSolution = true;
+  this.setup();
+};
+// Home: top of current clue / spot
+GameManager.prototype.home = function () {
+  this.moveToExtremity();
+};
+// End: bottom of current clue / spot
+GameManager.prototype.end = function () {
+  this.moveToExtremity( true );
+};
+GameManager.prototype.moveToExtremity = function ( end ) {
+  // go to top or bottom of clue / spot
+  if ( this.cursorCell && this.cursorSpot ) {
+    this.prepareTiles();
+    if ( this.currentClues.length == 1 ) {
+      // exactly one clue - we'll go to end cell of end spot
+      var spots = this.currentClues[ 0 ].spots;
+      this.cursorSpot = spots[ end ? spots.length - 1 : 0 ];
+    }
+    // Otherwise just go to end of current spot
+    var cells = this.cursorSpot.cells;
+    this.cursorCell = cells[ end ? cells.length - 1 : 0 ];
+    this.updateCurrentClues();
+    this.actuate();
+  }
+};
+// nextSpot (tab) - go to first cell of next spot in current direction
+GameManager.prototype.nextSpot = function () {
+  if ( this.cursorCell && this.cursorSpot ) {
+  }
+};
+
 
 // Keep playing after winning (allows going over target)
 GameManager.prototype.keepPlaying = function () {
@@ -380,7 +423,7 @@ GameManager.prototype.move = function ( direction ) {
   else {
     // xwdMode but not cheat (freakout) move)
     this.prepareTiles(); // makes previous position = current position so last move isn't reanimated
-    this.advanceCursor( ( direction - 1 ) & 3 );
+    this.advanceCursor( direction & 3 );
     this.actuate();
   }
 };
@@ -389,10 +432,10 @@ GameManager.prototype.move = function ( direction ) {
 GameManager.prototype.getVector = function (direction) {
   // Vectors representing tile movement
   var map = {
-    0: { x: 0,  y: -1 }, // Up
-    1: { x: 1,  y: 0 },  // Right
-    2: { x: 0,  y: 1 },  // Down
-    3: { x: -1, y: 0 }   // Left
+    0: { x: 1,  y: 0 },  // Right
+    1: { x: 0,  y: 1 },  // Down
+    2: { x: -1, y: 0 },  // Left
+    3: { x: 0,  y: -1 }  // Up
   };
 
   return map[direction];

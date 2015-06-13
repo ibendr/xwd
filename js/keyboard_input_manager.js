@@ -31,52 +31,83 @@ KeyboardInputManager.prototype.emit = function (event, data) {
   }
 };
 
+var keyMapMove = {
+    39: 0, // Right
+    40: 1, // Down
+    37: 2, // Left
+    38: 3, // Up
+
+  };
+
+var keyMapAction = {
+    27: "quit",
+     9: "nextSpot",
+    36: "home",
+    35: "end",
+    46: "delete",
+    13: "enter"
+}
+var keyCtrlAction = {
+    81: "quit",   	// Q
+    82: "restart",	// R
+    83: "solve",	// S
+    84: "nextSpot",	// T
+    
+}
 KeyboardInputManager.prototype.listen = function () {
   var self = this;
 
-  var map = {
-    38: 0, // Up
-    39: 1, // Right
-    40: 2, // Down
-    37: 3, // Left
-    75: 0, // Vim up
-    76: 1, // Vim right
-    74: 2, // Vim down
-    72: 3, // Vim left
-  };
-
+//   var map = keyMapMove;
+//   var keyLog = [];
   // Respond to direction keys
   document.addEventListener("keydown", function (event) {
-    var extraModifiers = event.altKey || event.ctrlKey || event.metaKey;
-    var shift = event.shiftKey;
-    var modifiers = extraModifiers || shift
-    var keyCode = event.which
-    if ( ( keyCode >= 65 && keyCode <= 90 ) && (!modifiers) ) {
-      // letter - put it in the grid
-      self.emit("insert",keyCode);
-    }
-    else {
-      var mapped = map[ keyCode ];
-      if (mapped !== undefined) {
-	if (!extraModifiers) {
-	  if (!shift) {
+    var extraModifiers = ( event.altKey ? 4 : 0 ) | ( event.ctrlKey ? 2 : 0 ) | ( event.metaKey ? 8 : 0 );
+    var shift = ( event.shiftKey ? 1 : 0 );
+    var modifiers = extraModifiers | shift;
+    var keyCode = event.which;
+//     // debug stuff
+//     keyLog.push( 1000 * modifiers + keyCode );
+//     if ( keyCode == 65 ) alert ( keyLog );
+    // If it's a letter - put it in the grid
+    if ( keyCode >= 65 && keyCode <= 90 ) {
+      if (!modifiers) {
+	self.emit( "insert" , keyCode );
+      }
+      else {  // unless modifiers - ctrl- gives certain commands
+	if ( event.ctrlKey ) {
+	  var mapped = keyCtrlAction[ keyCode ];
+	  if ( mapped ) {
 	    event.preventDefault();
-	    self.emit("move", mapped);
-	  }
-	  else { // cheat mode
-  // 	  if (self.cheatEnabled) {
-	      self.emit("move",mapped+4);
-  // 	  }
+	    self.emit( mapped , keyCode , modifiers );
 	  }
 	}
       }
-
-      // ctrl-R key restarts the game
-      if (event.ctrlKey && event.which === 82) {
-	self.restart.call(self, event);
+    }
+    else {
+      // check for move keys (arrows)
+      var mapped = keyMapMove[ keyCode ];
+      if ( mapped !== undefined ) {
+	if ( !extraModifiers ) {
+	  event.preventDefault();
+	  self.emit( "move", mapped + ( shift ? 4 : 0 ) ) ;
+	}
+	else {
+	  // check for ctrl- or alt- arrow combinations here
+	}
+      }
+      else {
+	// Finally check for command keys - Home, End, Del, Esc etc.
+	var mapped = keyMapAction[ keyCode ];
+	if ( mapped !== undefined ) {
+	  event.preventDefault();
+	  self.emit( mapped , keyCode , modifiers );
+	}
       }
     }
   });
+//       // ctrl-R key restarts the game
+//       if (event.ctrlKey && event.which === 82) {
+// 	self.restart.call(self, event);
 
   // Respond to button presses
   this.bindButtonPress(".retry-button", this.restart);

@@ -119,8 +119,6 @@ HTMLActuator.prototype.addTile = function ( tile , extraClasses ) {
     window.requestAnimationFrame(function () {
       wrapper.style.left = ( tile.x * 40 ) + "px";
       wrapper.style.top  = ( tile.y * 40 ) + "px";
-//       classes[2] = self.positionClass({ x: tile.x, y: tile.y });
-//       self.applyClasses(wrapper, classes); // Update the position
     });
   } else if (tile.mergedFrom) {
     classes.push("tile-merged");
@@ -156,7 +154,7 @@ HTMLActuator.prototype.positionClass = function (position) {
   return "tile-position-" + position.x + "-" + position.y;
 };
 HTMLActuator.prototype.updateCurrentClue = function ( clue ) { 
-  document.getElementById( "clue-container" ).innerText = clue;
+  document.getElementById( "clue-container" ).textContent = clue;
 };
 HTMLActuator.prototype.updateScore = function (score) {
   this.clearContainer(this.scoreContainer);
