@@ -25,6 +25,11 @@ Crossword.prototype.html = function() {
   return outStr;
 }
 
+var xwd;
+
+function xwdReader() {
+  return xwd = new Crossword( xwdGrid , xwdClues );
+}
 // look for query
 
 var xwdPuzzleName = null;

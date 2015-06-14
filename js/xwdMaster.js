@@ -72,7 +72,7 @@ document.write( stdHtml )
 
 var xwdClues, xwdGrid, xwd;
 
-documentOnload = function() {
+xwdReader = function() {
   var gridEls  = document.getElementsByClassName( "xwdSolution" );
   var gridEl   = gridEls && gridEls.length && gridEls[ 0 ];
   
@@ -84,7 +84,7 @@ documentOnload = function() {
   
 //   alert( xwdGrid );
   
+  if ( cluesEl && cluesEl.style ) cluesEl.style.display = "none";
+  
   return ( xwd = new Crossword( xwdGrid , xwdClues ) );
 }
-
-xwdReader = documentOnload;

@@ -46,6 +46,8 @@ body {
   100% {
     top: -50px;
     opacity: 0; } }
+.xwd-source {
+  display: none; }
 .scores-container {
   float: left;
   text-align: right; }
