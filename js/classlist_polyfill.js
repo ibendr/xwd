@@ -1,3 +1,9 @@
+/*
+ Defines a pseudo-property classList on HTMLElement, which
+ fetches the elements className and breaks it by whitespace into a
+ list of tokens.
+ */
+
 (function () {
   if (typeof window.Element === "undefined" ||
       "classList" in document.documentElement) {
@@ -13,6 +19,7 @@
     this.el = el;
     // The className needs to be trimmed and split on whitespace
     // to retrieve a list of classes.
+    //     The 'replace' removes leading and trailing whitespace
     var classes = el.className.replace(/^\s+|\s+$/g, '').split(/\s+/);
     for (var i = 0; i < classes.length; i++) {
       push.call(this, classes[i]);

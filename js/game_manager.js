@@ -20,7 +20,16 @@ function GameManager(/*size, blocks,*/ xwd, target, InputManager, Actuator, Stor
 
   this.startTiles     = 2;
   this.cheatEnabled   = true;
+//   This section makes bound versions of the GameManager object's methods ( move , end , solve ... )
+//   	i.e. functions which call them with this GameManager object as 'this' even when they aren't
+//   	called by local code (i.e. other methods of GameManager, which would have 'this' already set)
+//   This is done so that they can be called by the inputManager's emit() function
+//   NOTE: There should be plenty of other ways around this.  e.g. register object, method pairs 
+//	with the input manager.  Raises question about overall organisation - why does the input
+//   	manager belong to a particular object? etc. Perhaps my own event handler (one per browser,
+//   	routing events to different objects) is better structured
   this.inputManager.on("move",        this.move.bind(       this));
+  this.inputManager.on("goto",        this.goto.bind(       this));
   this.inputManager.on("home",        this.home.bind(       this));
   this.inputManager.on("end",         this.end.bind(        this));
   this.inputManager.on("nextSpot",    this.nextSpot.bind(   this));
@@ -173,38 +182,77 @@ GameManager.prototype.updateCurrentClues = function () {
 //     alert( otherSpots.length );
   }
 }
-GameManager.prototype.advanceCursor = function ( d ) {
-  if ( !this.cursorCell ) return this.initCursor();
-  if ( !this.cursorSpot ) {
-    if ( this.cursorCell.spots && this.cursorCell.spots.length ) {
-      this.cursorSpot = this.cursorCell.spots[ 0 ][ 0 ];
+GameManager.prototype.goto = function( destination ) {
+//     destination will be format "xx-yy-d" where xx,yy are coordinates numbered from 01
+//				and d is direction 0: unspecified, 1: across, 2: down
+//     alert("Going to "+destination);
+    var destX = parseInt( destination.slice(0,2) - 1 );
+    var destY = parseInt( destination.slice(3,5) - 1 );
+    var destD = parseInt( destination.slice(6,7) );
+//     alert("Going to "+destX + "," + destY + "," + destD);
+    var cell = this.xwd.cells2[ destY ][ destX ];
+    this.moveCursorToCell( cell , destD ? ( destD - 1 ) : 
+	    ( ( this.cursorSpot && this.cursorSpot.label[ 0 ] ) || 0 ) );
+    this.actuate();
+};
+GameManager.prototype.moveCursorToCell = function ( cell , d ) {
+        if ( cell ) {
+	this.cursorCell = cell;
+	if ( ( !this.cursorSpot ) || ( this.cursorSpot.cells.indexOf( cell ) == -1 ) ) {
+	    // no longer in same spot (or wasn't in a spot)
+	    var spots = cell.spots;
+	    // If new cell only in one spot, that's our spot
+	    // (although ideally if it's in wrong direction we should look for next one)
+	    if ( spots.length == 1 ) {
+		this.cursorSpot = spots[ 0 ][ 0 ];
+	    } // if it's in two spots then we prefer our current direction
+	    else if ( spots.length == 2 ) {
+		this.cursorSpot = spots[ ( spots[ 0 ][ 0 ].label[ 0 ] == d ) ? 0 : 1 ][ 0 ];
+	    }
+	    else {
+		this.cursorSpot = null;
+	    }
+	    this.updateCurrentClues();	// whether or not we found a valid spot
+	}
     }
-  }
-  if ( d == undefined ) d = ( this.cursorSpot && this.cursorSpot.label[ 0 ] ) || 0;
-  var cell = this.nextLiveCell( this.cursorCell.pos.x , this.cursorCell.pos.y , d );
-  if ( cell ) {
-    this.cursorCell = cell;
-    if ( this.cursorSpot.cells.indexOf( cell ) == -1 ) {
-      // no longer in same spot
-      var spots = cell.spots;
-      // If new cell only in one spot, that's our spot
-      // (although ideally if it's in wrong direction we should look for next one)
-      if ( spots.length == 1 ) {
-	this.cursorSpot = spots[ 0 ][ 0 ];
-      } // if it's in two spots then we prefer our current direction
-      else if ( spots.length == 2 ) {
-	this.cursorSpot = spots[ ( spots[ 0 ][ 0 ].label[ 0 ] == d ) ? 0 : 1 ][ 0 ];
-      }
-      else {
+    else { // no next live cell !?
+	this.cursorCell = null;
 	this.cursorSpot = null;
-      }
-      this.updateCurrentClues();	// whether or not we found a valid spot
     }
-  }
-  else { // no next live cell !?
-    this.cursorCell = null;
-    this.cursorSpot = null;
-  }
+};
+GameManager.prototype.advanceCursor = function ( d ) {
+    if ( !this.cursorCell ) return this.initCursor();
+    if ( !this.cursorSpot ) {
+	if ( this.cursorCell.spots && this.cursorCell.spots.length ) {
+	this.cursorSpot = this.cursorCell.spots[ 0 ][ 0 ];
+	}
+    }
+    if ( d == undefined ) d = ( this.cursorSpot && this.cursorSpot.label[ 0 ] ) || 0;
+    var cell = this.nextLiveCell( this.cursorCell.pos.x , this.cursorCell.pos.y , d );
+    this.moveCursorToCell( cell , d );
+//     if ( cell ) {
+// 	this.cursorCell = cell;
+// 	if ( this.cursorSpot.cells.indexOf( cell ) == -1 ) {
+// 	    // no longer in same spot
+// 	    var spots = cell.spots;
+// 	    // If new cell only in one spot, that's our spot
+// 	    // (although ideally if it's in wrong direction we should look for next one)
+// 	    if ( spots.length == 1 ) {
+// 		this.cursorSpot = spots[ 0 ][ 0 ];
+// 	    } // if it's in two spots then we prefer our current direction
+// 	    else if ( spots.length == 2 ) {
+// 		this.cursorSpot = spots[ ( spots[ 0 ][ 0 ].label[ 0 ] == d ) ? 0 : 1 ][ 0 ];
+// 	    }
+// 	    else {
+// 		this.cursorSpot = null;
+// 	    }
+// 	    this.updateCurrentClues();	// whether or not we found a valid spot
+// 	}
+//     }
+//     else { // no next live cell !?
+// 	this.cursorCell = null;
+// 	this.cursorSpot = null;
+//     }
 }
 
 GameManager.prototype.nextLiveCell = function ( x , y , d ) {
@@ -252,43 +300,43 @@ GameManager.prototype.nextLiveCell = function ( x , y , d ) {
 // Adds a tile in a random position 
 // inner part of this funtion now removed to the new addTileAt
 GameManager.prototype.addRandomTile = function () {
-  if (this.grid.cellsAvailable()) {
-    return this.addTileAt( this.grid.randomAvailableCell() );
-  }
+    if (this.grid.cellsAvailable()) {
+	return this.addTileAt( this.grid.randomAvailableCell() );
+    }
 };
 
 // Adds a tile in a specified position
 GameManager.prototype.addTileAt = function ( cell , v , l ) {
-  /*alert*/( cell.x + '-' + cell.y );
-  var value = v || ( Math.random() < 0.83 ? 1 : ( Math.random() < 0.83 ? 2 : 3 ) )
-  var label = l || "";
-  var tile = new Tile( cell , value , label );
-  this.grid.insertTile( tile );
-  this.newestTile = tile;
-  return tile
+    /*alert*/( cell.x + '-' + cell.y );
+    var value = v || ( Math.random() < 0.83 ? 1 : ( Math.random() < 0.83 ? 2 : 3 ) )
+    var label = l || "";
+    var tile = new Tile( cell , value , label );
+    this.grid.insertTile( tile );
+    this.newestTile = tile;
+    return tile
 };
 
 // Sends the updated grid to the actuator
 GameManager.prototype.actuate = function () {
-  if (this.storageManager.getBestScore() < this.score) {
-    this.storageManager.setBestScore(this.score);
-  }
+    if (this.storageManager.getBestScore() < this.score) {
+	this.storageManager.setBestScore(this.score);
+    }
 
-  // Clear the state when the game is over (game over only, not win)
-  if (this.over) {
-    this.storageManager.clearGameState();
-  } else {
-    this.storageManager.setGameState(this.serialize());
-  }
+    // Clear the state when the game is over (game over only, not win)
+    if (this.over) {
+	this.storageManager.clearGameState();
+    } else {
+	this.storageManager.setGameState(this.serialize());
+    }
 
-  this.actuator.actuate(this.grid, {
-    score:      this.score,
-    over:       this.over,
-    won:        this.won,
-    bestScore:  this.storageManager.getBestScore(),
-    terminated: this.isGameTerminated(),
-    currentClue:this.displayClues.join("\n"),
-  } , this.cursorCell , this.cursorSpot , this.cursorSpots , this.xwd.cells2 );
+    this.actuator.actuate(this.grid, {
+	score:      this.score,
+	over:       this.over,
+	won:        this.won,
+	bestScore:  this.storageManager.getBestScore(),
+	terminated: this.isGameTerminated(),
+	currentClue:this.displayClues.join("\n"),
+    } , this.cursorCell , this.cursorSpot , this.cursorSpots , this.xwd.cells2 );
 
 };
 
@@ -305,34 +353,34 @@ GameManager.prototype.serialize = function () {
 
 // Save all tile positions and remove merger info
 GameManager.prototype.prepareTiles = function () {
-  this.grid.eachCell( function ( x , y , tile ) {
-    if ( tile ) {
-      tile.mergedFrom = null;
-      tile.mergedAs = tile.value;
-      tile.savePosition();
-    }
-  });
+    this.grid.eachCell( function ( x , y , tile ) {
+	if ( tile ) {
+	tile.mergedFrom = null;
+	tile.mergedAs = tile.value;
+	tile.savePosition();
+	}
+    });
 };
 
 // Move a tile and its representation
 GameManager.prototype.moveTile = function ( tile , cell ) {
-  this.grid.cells[ tile.y ][ tile.x ] = null;
-  this.grid.cells[ cell.y ][ cell.x ] = tile;
-  tile.updatePosition( cell );
+    this.grid.cells[ tile.y ][ tile.x ] = null;
+    this.grid.cells[ cell.y ][ cell.x ] = tile;
+    tile.updatePosition( cell );
 };
 
 // Enter text into grid
 GameManager.prototype.insert = function ( keyCode ) { 
-  if ( this.cursorCell ) {
-    var cursorPos = this.cursorCell.pos;
-    var cursorTile = this.grid.cells[ cursorPos.y ][ cursorPos.x ]
-    if ( cursorTile ) {
-      cursorTile.value = String.fromCharCode( keyCode );
-      this.prepareTiles(); // makes previous position = current position so last move isn't reanimated
-      this.advanceCursor();
-      this.actuate();
+    if ( this.cursorCell ) {
+	var cursorPos = this.cursorCell.pos;
+	var cursorTile = this.grid.cells[ cursorPos.y ][ cursorPos.x ]
+	if ( cursorTile ) {
+	cursorTile.value = String.fromCharCode( keyCode );
+	this.prepareTiles(); // makes previous position = current position so last move isn't reanimated
+	this.advanceCursor();
+	this.actuate();
+	}
     }
-  }
 }
 
 

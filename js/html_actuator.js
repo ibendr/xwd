@@ -94,7 +94,7 @@ HTMLActuator.prototype.addTile = function ( tile , extraClasses ) {
   var positionClass = this.positionClass(position);
 
   // We can't use classlist because it somehow glitches when replacing classes
-  var classes = ["tile", "tile-" + nameSafe( tile.value )/*, positionClass*/];
+  var classes = ["tile", "tile-" + nameSafe( tile.value ), positionClass];
   
   if ( extraClasses ) {
     classes = classes.concat( extraClasses );
@@ -151,7 +151,8 @@ HTMLActuator.prototype.normalizePosition = function (position) {
 
 HTMLActuator.prototype.positionClass = function (position) {
   position = this.normalizePosition(position);
-  return "tile-position-" + position.x + "-" + position.y;
+  return "tile-position-" + ( position.x < 10 ? '0' : '' ) + position.x + 
+		      "-" + ( position.y < 10 ? '0' : '' ) + position.y ;
 };
 HTMLActuator.prototype.updateCurrentClue = function ( clue ) { 
   document.getElementById( "clue-container" ).textContent = clue;

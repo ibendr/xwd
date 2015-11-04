@@ -1,5 +1,7 @@
+var theTarget;
 function KeyboardInputManager() {
   this.events = {};
+  this.mouseIsDown = false;
 
   if (window.navigator.msPointerEnabled) {
     //Internet Explorer 10 style
@@ -16,6 +18,7 @@ function KeyboardInputManager() {
 }
 
 KeyboardInputManager.prototype.on = function (event, callback) {
+//     Add a function to the list to be called for a particular event name
   if (!this.events[event]) {
     this.events[event] = [];
   }
@@ -23,6 +26,7 @@ KeyboardInputManager.prototype.on = function (event, callback) {
 };
 
 KeyboardInputManager.prototype.emit = function (event, data) {
+//     "Do" the event - i.e. call all the functions listed for it
   var callbacks = this.events[event];
   if (callbacks) {
     callbacks.forEach(function (callback) {
@@ -135,7 +139,37 @@ KeyboardInputManager.prototype.listen = function () {
     event.preventDefault();
   });
 
-  gameContainer.addEventListener(this.eventTouchmove, function (event) {
+  gameContainer.addEventListener("mousedown", function (event) {
+//       alert( event.pageX );
+    this.mouseIsDown = true;
+    this.mousePressedAtX = event.pageX;
+    this.mousePressedAtY = event.pageY;
+    this.mousePressedAtTarget = event.target;
+    event.preventDefault();
+  });
+
+  gameContainer.addEventListener("mouseup", function (event) {
+    if (!this.mouseIsDown) {
+      return; // Ignore if initial press was before we were listening
+    }
+    this.mouseIsDown = false;
+
+    var dx = event.pageX - this.mousePressedAtX;
+    var dy = event.pageY - this.mousePressedAtY;
+    var absDx = Math.abs(dx);
+    var absDy = Math.abs(dy);
+
+    theTarget = this.mousePressedAtTarget;
+    var destination = this.mousePressedAtTarget.parentElement.classList[2].slice(14);
+    var axis = 0;
+    if (Math.max(absDx, absDy) > 10) {
+	var axis =  absDx > absDy ? 1 : 2;
+    }
+    destination += "-" + axis;/*
+    alert(destination);*/
+    self.emit("goto",destination);
+  });
+  gameContainer.addEventListener("mouseMove", function (event) {
     event.preventDefault();
   });
 

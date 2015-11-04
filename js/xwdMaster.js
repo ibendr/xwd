@@ -9,7 +9,7 @@
 // look for query
 
 function include( ) {
-  // the arguments object is not an array and has now forEach method
+  // the arguments object is not an array and has no forEach method
   for ( i=0 ; i<arguments.length ; i++ ) {
     file = arguments[ i ];
     document.write( '<script type="text/javascript" src="' + file + '"></script>' );
