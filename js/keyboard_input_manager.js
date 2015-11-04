@@ -169,7 +169,7 @@ KeyboardInputManager.prototype.listen = function () {
     alert(destination);*/
     self.emit("goto",destination);
   });
-  gameContainer.addEventListener("mouseMove", function (event) {
+  gameContainer.addEventListener("mousemove", function (event) {
     event.preventDefault();
   });
 

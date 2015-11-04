@@ -1,7 +1,7 @@
 xwdMode = 1
 
-function GameManager(/*size, blocks,*/ xwd, target, InputManager, Actuator, StorageManager) {
-  if ( xwdPuzzleName ) document.getElementById("title").innerText = xwdPuzzleName;
+function GameManager(xwd, target, InputManager, Actuator, StorageManager) {    
+//   document.getElementById("title").innerText = xwdPuzzleName;
 
   // blocks is new parameter for xwd - for now it's the rows of the grid as strings
   this.xwd            = xwd;
@@ -9,7 +9,7 @@ function GameManager(/*size, blocks,*/ xwd, target, InputManager, Actuator, Stor
 //   this.blocks         = blocks;
   this.target         = target || 960;
   this.inputManager   = new InputManager;
-  this.storageManager = new StorageManager( "Xwd" );
+  this.storageManager = new StorageManager( "Xwd-" + xwdPuzzleName );
   this.actuator       = new Actuator;
   
   this.cursorCell     = null;	// cell under cursor...
@@ -196,24 +196,24 @@ GameManager.prototype.goto = function( destination ) {
     this.actuate();
 };
 GameManager.prototype.moveCursorToCell = function ( cell , d ) {
-        if ( cell ) {
-	this.cursorCell = cell;
-	if ( ( !this.cursorSpot ) || ( this.cursorSpot.cells.indexOf( cell ) == -1 ) ) {
-	    // no longer in same spot (or wasn't in a spot)
-	    var spots = cell.spots;
-	    // If new cell only in one spot, that's our spot
-	    // (although ideally if it's in wrong direction we should look for next one)
-	    if ( spots.length == 1 ) {
-		this.cursorSpot = spots[ 0 ][ 0 ];
-	    } // if it's in two spots then we prefer our current direction
-	    else if ( spots.length == 2 ) {
-		this.cursorSpot = spots[ ( spots[ 0 ][ 0 ].label[ 0 ] == d ) ? 0 : 1 ][ 0 ];
-	    }
-	    else {
-		this.cursorSpot = null;
-	    }
-	    this.updateCurrentClues();	// whether or not we found a valid spot
+    if ( cell ) {
+    this.cursorCell = cell;
+// 	if ( ( !this.cursorSpot ) || ( this.cursorSpot.cells.indexOf( cell ) == -1 ) ) {
+	// no longer in same spot (or wasn't in a spot)
+	var spots = cell.spots;
+	// If new cell only in one spot, that's our spot
+	// (although ideally if it's in wrong direction we should look for next one)
+	if ( spots.length == 1 ) {
+	    this.cursorSpot = spots[ 0 ][ 0 ];
+	} // if it's in two spots then we prefer our current direction
+	else if ( spots.length == 2 ) {
+	    this.cursorSpot = spots[ ( spots[ 0 ][ 0 ].label[ 0 ] == d ) ? 0 : 1 ][ 0 ];
 	}
+	else {
+	    this.cursorSpot = null;
+	}
+	this.updateCurrentClues();	// whether or not we found a valid spot
+// 	}
     }
     else { // no next live cell !?
 	this.cursorCell = null;

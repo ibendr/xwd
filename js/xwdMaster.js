@@ -16,8 +16,12 @@ function include( ) {
   }
 }
 
-var URLtail = document.URL.split("/").reverse()[ 0 ];
-var xwdPuzzleName = URLtail.split(".xwd.html")[ 0 ];
+var xwdPuzzleName; // we may introduce another mechanism for specifying the puzzle name
+if ( !xwdPuzzleName ) {
+    var url = document.URL;
+    // take the puzzle name to be the filename stripped of path and (last) extension
+    xwdPuzzleName = url.slice( url.lastIndexOf('/') + 1, url.lastIndexOf('.') ) || "untitled";
+}
 
 document.write( '\
   <head>\
@@ -51,7 +55,7 @@ stdHtml = '\
       </td>\
       <td class="side-bar">\
 	<div class="heading">\
-	  <h1 id="title">xwd</h1>\
+	  <h1 id="title">' + xwdPuzzleName + '</h1>\
 	  <div class="scores-container">\
 	    <div class="score-container">0</div>\
 	    <div class="best-container">0</div>\
