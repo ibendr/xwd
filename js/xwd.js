@@ -49,13 +49,15 @@ var cEnds = "|#/\\<>";  // characters denoting end of line of crossword (comment
 
 // cell and spot classes are structural info only - content or possible content elsewhere
 
-function xwdCell( x , y ) {
+function xwdCell( x , y , sol ) {
     // A cell is a small square of the crossword ( space in which one letter / character is entered )
     this.pos = { x: x , y: y };
-    // Naming is alphabetic (concise), with row first for correct overall ordering
+    // Naming - for code use - is alphabetic (concise), with row first for correct overall ordering
+    //	eg "Be" is row 2 column 5
     this.name =  ABC[ y ] + abc[ x ];
     // What spots of the crossword the cell is in (shouldn't stay empty)
     this.spots = [];
+    this.sol = sol || " ";
 }
 
 xwdCell.prototype.inSpots = function( spots ) {
@@ -76,6 +78,7 @@ function xwdSpot( cells ) {
     this.length = cells.length;
     // Naming is join of names of cells - internal code use only - should have more obscure name
     this.name = cells.reduce( function( c1 , c2 ) { return ( c1.name || c1 ) + "-" + c2.name } );
+    this.sol  = cells.reduce( function( c1 , c2 ) { return ( c1.sol  || c1 )    +    c2.sol  } );
     // But we also have label according to head-cell label - and clue direction
     // Check whether this is a downward spot (see if second cell below first)
     var dir = ( ( cells.length > 1 ) && ( cells[ 1 ].pos.y > cells[ 0 ].pos.y ) ) ? 1 : 0;
@@ -364,7 +367,7 @@ Crossword.prototype.readGrid = function( gridRows ) {
 	    if ( cCells.indexOf( c ) > -1 ) {
 	    // Live cell of crossword - continue (or start) spots
 	    rowLength++ ;
-	    var newCell = new xwdCell( x , y );
+	    var newCell = new xwdCell( x , y , c );
 	    if ( !spotNowAcc      )  this.spots[ 0 ].push( spotNowAcc      = [] );
 	    if ( !spotsNowDn[ x ] )  this.spots[ 1 ].push( spotsNowDn[ x ] = [] );
 	    this.cells.push( newCell );

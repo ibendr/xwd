@@ -160,7 +160,9 @@ KeyboardInputManager.prototype.listen = function () {
     var absDy = Math.abs(dy);
 
     theTarget = this.mousePressedAtTarget;
-    var destination = this.mousePressedAtTarget.parentElement.classList[2].slice(14);
+    var destination = this.mousePressedAtTarget.parentElement
+    destination = destination && ( destination.classList[2] );
+    destination = destination && ( destination.slice(14) );
     var axis = 0;
     if (Math.max(absDx, absDy) > 10) {
 	var axis =  absDx > absDy ? 1 : 2;
