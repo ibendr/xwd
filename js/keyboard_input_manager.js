@@ -114,9 +114,10 @@ KeyboardInputManager.prototype.listen = function () {
 // 	self.restart.call(self, event);
 
   // Respond to button presses
-  this.bindButtonPress(".retry-button", this.restart);
+  this.bindButtonPress(".solution-button", this.solve);
   this.bindButtonPress(".restart-button", this.restart);
-  this.bindButtonPress(".keep-playing-button", this.keepPlaying);
+  this.bindButtonPress(".cheat-button", this.cheat);
+  this.bindButtonPress(".check-button", this.check);
 
   // Respond to swipe events
   var touchStartClientX, touchStartClientY;
@@ -204,16 +205,27 @@ KeyboardInputManager.prototype.listen = function () {
   });
 };
 
+// I hate this sort of stuff - will get rid of it all at some point...
+
 KeyboardInputManager.prototype.restart = function (event) {
   event.preventDefault();
   this.emit("restart");
 };
 
-KeyboardInputManager.prototype.keepPlaying = function (event) {
+KeyboardInputManager.prototype.solve = function (event) {
   event.preventDefault();
-  this.emit("keepPlaying");
+  this.emit("solve");
 };
 
+KeyboardInputManager.prototype.cheat = function (event) {
+  event.preventDefault();
+  this.emit("cheat");
+};
+
+KeyboardInputManager.prototype.check = function (event) {
+  event.preventDefault();
+  this.emit("check");
+};
 KeyboardInputManager.prototype.bindButtonPress = function (selector, fn) {
   var button = document.querySelector(selector);
   button.addEventListener("click", fn.bind(this));

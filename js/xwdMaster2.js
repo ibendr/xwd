@@ -58,9 +58,9 @@ stdHtml = '\
 	</div>\
 	<p class="game-intro"></p>\
 	<a class="restart-button">Clear grid</a>\
-	<a class="restart-button">Clear grid</a>\
-	<a class="restart-button">Clear grid</a>\
-	<a class="restart-button">Clear grid</a>\
+	<a class="solution-button">Show solution</a>\
+	<a class="cheat-button">Cheat (show word) grid</a>\
+	<a class="check-button">Check progress</a>\
 	<p class="game-explanation"> \
 	</p>\
 	<p id="clue-container" class="clue-container">\

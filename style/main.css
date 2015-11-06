@@ -420,8 +420,9 @@ hr {
   line-height: 42px;
   margin-bottom: 0; }
 
-.restart-button {
-  display: inline-block;
+.restart-button .solution-button .cheat-button .check-button {
+/*   display: inline-block; */
+  position: relative;
   margin: 4px ;
   background: #8f7a66;
   border-radius: 3px;
@@ -430,9 +431,9 @@ hr {
   color: #f9f6f2;
   height: 40px;
   line-height: 42px;
-  display: block;
+/*   display: block; */
   text-align: center;
-  float: left; }
+  /*float: left;*/ }
 
 .game-explanation {
   margin-top: 50px; }

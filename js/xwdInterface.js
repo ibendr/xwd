@@ -22,35 +22,91 @@ function xwdInterface( xwd, EventManager, Actuator, StorageManager ) {
 //   	manager belong to a particular object? etc. Perhaps my own event handler (one per browser,
 //   	routing events to different objects) is better structured
   // NAVIGATION	
-  this.eventManager.on("move",        this.move.bind(       this));	// move in a direction
-  this.eventManager.on("goto",        this.goto.bind(       this));	// go to particular cell (and dir'n)
-  this.eventManager.on("home",        this.home.bind(       this));	// to top of spot
-  this.eventManager.on("end",         this.end.bind(        this));	// to end of spot
-  this.eventManager.on("nextSpot",    this.nextSpot.bind(   this));	// on to next spot (not implemented yet)
+  this.eventManager.on( "move",        this.move.bind(        this ));	// move in a direction
+  this.eventManager.on( "goto",        this.goto.bind(        this ));	// go to particular cell (and dir'n)
+  this.eventManager.on( "home",        this.home.bind(        this ));	// to top of spot
+  this.eventManager.on( "end",         this.end.bind(         this ));	// to end of spot
+  this.eventManager.on( "nextSpot",    this.nextSpot.bind(    this ));	// on to next spot (not implemented yet)
   // ACTIONS
-  this.eventManager.on("insert",      this.insert.bind(     this));	// put text in
-  this.eventManager.on("restart",     this.restart.bind(    this));	// clear the puzzle
-  this.eventManager.on("solve",       this.solve.bind(      this));	// give up and show solution
-  this.eventManager.on("keepPlaying", this.keepPlaying.bind(this));	// ? (2048 legacy)
+  this.eventManager.on( "insert",      this.insert.bind(      this ));	// put text in
+  this.eventManager.on( "restart",     this.restart.bind(     this ));	// clear the puzzle
+  this.eventManager.on( "solve",       this.revealAll.bind(   this ));	// give up and show solution
+  this.eventManager.on( "cheat",       this.revealSpot.bind(  this ));	// show current word
+  this.eventManager.on( "check",       this.checkAll.bind(    this ));	// check answers entered so far
+  this.eventManager.on( "keepPlaying", this.keepPlaying.bind( this ));	// ? (2048 legacy)
 
   this.setup();
 }
 
 // Restart the game
 xwdInterface.prototype.restart = function () {
-  this.storageManager.clearGameState();
-  this.actuator.continueGame(); // Clear the game won/lost message
-  showSolution = false;
-  this.setup();
+    this.storageManager.clearGameState();
+    this.actuator.continueGame(); // Clear the game won/lost message
+    showSolution = false;
+    this.setup();
 };
-
+xwdInterface.prototype.revealSpot = function () { 
+    // reveal current word
+    if ( this.cursorSpot && this.cursorSpot.cells ) {
+	var self = this;
+	this.cursorSpot.cells.forEach( function ( cell ) {
+	    // reveal cell
+	    var cellPos = cell.pos;
+	    var cellTile = self.grid.cells[ cellPos.y ][ cellPos.x ];
+	    if ( cellTile ) {
+		cellTile.value = cell.sol;
+	    }
+	});
+	this.actuate();
+    }
+};
+xwdInterface.prototype.revealAll = function () { 
+    // reveal whole grid
+    var self = this;
+    this.xwd.cells.forEach( function ( cell ) {
+	var cellPos = cell.pos;
+	var cellTile = self.grid.cells[ cellPos.y ][ cellPos.x ];
+	if ( cellTile ) {
+	    cellTile.value = cell.sol;
+	}
+    });
+    this.actuate();
+};
+xwdInterface.prototype.checkSpot = function () {
+    if ( this.cursorSpot && this.cursorSpot.cells ) {
+	var self = this;
+	this.cursorSpot.cells.forEach( function ( cell ) {
+	    // reveal cell
+	    var cellPos = cell.pos;
+	    var cellTile = self.grid.cells[ cellPos.y ][ cellPos.x ];
+	    if ( cellTile ) {
+		if ( cellTile.value != cell.sol ) cellTile.value = " ";
+	    }
+	});
+	this.actuate();
+    }
+    
+};
+xwdInterface.prototype.checkAll = function () { 
+    // check whole grid
+    var self = this;
+    this.xwd.cells.forEach( function ( cell ) {
+	var cellPos = cell.pos;
+	var cellTile = self.grid.cells[ cellPos.y ][ cellPos.x ];
+	if ( cellTile ) {
+	    if ( cellTile.value != cell.sol ) cellTile.value = " ";
+	}
+    });
+    this.actuate();
+};
+/*
 // Solve the puzzle (show the solution)
 xwdInterface.prototype.solve = function () {
   this.storageManager.clearGameState();
   this.actuator.continueGame(); // Clear the game won/lost message
   showSolution = true;
   this.setup();
-};
+};*/
 // Home: top of current clue / spot
 xwdInterface.prototype.home = function () {
   this.moveToExtremity();
@@ -173,13 +229,11 @@ xwdInterface.prototype.goto = function( destination ) {
 //     destination will be format "xx-yy-d" where xx,yy are coordinates numbered from 01
 //				and d is direction 0: unspecified, 1: across, 2: down
 //     alert("Going to "+destination);
-    var destX = parseInt( destination.slice(0,2) - 1 );
-    var destY = parseInt( destination.slice(3,5) - 1 );
+    var destX = parseInt( destination.slice(0,2) );
+    var destY = parseInt( destination.slice(3,5) );
     var destD = parseInt( destination.slice(6,7) );
-//     alert("Going to "+destX + "," + destY + "," + destD);
     if ( destX * destY ) {
-	var cell = this.xwd.cells2[ destY ][ destX ];
-// 	catch ( e ) { alert(destination) }
+	var cell = this.xwd.cells2[ destY - 1 ][ destX - 1 ];
 	this.moveCursorToCell( cell , destD ? ( destD - 1 ) : 
 		( ( this.cursorSpot && this.cursorSpot.label[ 0 ] ) || 0 ) );
     }
@@ -225,29 +279,6 @@ xwdInterface.prototype.advanceCursor = function ( d ) {
     if ( d == undefined ) d = ( this.cursorSpot && this.cursorSpot.label[ 0 ] ) || 0;
     var cell = this.nextLiveCell( this.cursorCell.pos.x , this.cursorCell.pos.y , d );
     this.moveCursorToCell( cell , d );
-//     if ( cell ) {
-// 	this.cursorCell = cell;
-// 	if ( this.cursorSpot.cells.indexOf( cell ) == -1 ) {
-// 	    // no longer in same spot
-// 	    var spots = cell.spots;
-// 	    // If new cell only in one spot, that's our spot
-// 	    // (although ideally if it's in wrong direction we should look for next one)
-// 	    if ( spots.length == 1 ) {
-// 		this.cursorSpot = spots[ 0 ][ 0 ];
-// 	    } // if it's in two spots then we prefer our current direction
-// 	    else if ( spots.length == 2 ) {
-// 		this.cursorSpot = spots[ ( spots[ 0 ][ 0 ].label[ 0 ] == d ) ? 0 : 1 ][ 0 ];
-// 	    }
-// 	    else {
-// 		this.cursorSpot = null;
-// 	    }
-// 	    this.updateCurrentClues();	// whether or not we found a valid spot
-// 	}
-//     }
-//     else { // no next live cell !?
-// 	this.cursorCell = null;
-// 	this.cursorSpot = null;
-//     }
 }
 
 xwdInterface.prototype.nextLiveCell = function ( x , y , d ) {

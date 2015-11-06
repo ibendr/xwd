@@ -3,7 +3,7 @@
 
 function HTMLActuator() {
   this.tileContainer    = document.querySelector(".tile-container");
-  this.messageContainer = document.querySelector(".game-message");
+//   this.messageContainer = document.querySelector(".game-message");
 }
 
 HTMLActuator.prototype.actuate = function ( grid , metadata , cursorCell , cursorSpot , otherSpots , cells2 ) {
