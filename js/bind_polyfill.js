@@ -4,6 +4,8 @@
 //    the target as 'this'
 Function.prototype.bind = Function.prototype.bind || function (target) {
   var self = this;	// the function being bound
+  // It is vitally important that self is NOT a global variable.
+  // Whenever this gets called, a specific target 'self' is hardwired into the returned function
   return function (args) {
     if (!(args instanceof Array)) {
       args = [args];

@@ -28,15 +28,17 @@ function GameManager(xwd, target, InputManager, Actuator, StorageManager) {
 //	with the input manager.  Raises question about overall organisation - why does the input
 //   	manager belong to a particular object? etc. Perhaps my own event handler (one per browser,
 //   	routing events to different objects) is better structured
-  this.inputManager.on("move",        this.move.bind(       this));
-  this.inputManager.on("goto",        this.goto.bind(       this));
-  this.inputManager.on("home",        this.home.bind(       this));
-  this.inputManager.on("end",         this.end.bind(        this));
-  this.inputManager.on("nextSpot",    this.nextSpot.bind(   this));
-  this.inputManager.on("insert",      this.insert.bind(     this));
-  this.inputManager.on("restart",     this.restart.bind(    this));
-  this.inputManager.on("solve",       this.solve.bind(      this));
-  this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));
+  // NAVIGATION	
+  this.inputManager.on("move",        this.move.bind(       this));	// move in a direction
+  this.inputManager.on("goto",        this.goto.bind(       this));	// go to particular cell (and dir'n)
+  this.inputManager.on("home",        this.home.bind(       this));	// to top of spot
+  this.inputManager.on("end",         this.end.bind(        this));	// to end of spot
+  this.inputManager.on("nextSpot",    this.nextSpot.bind(   this));	// on to next spot (not implemented yet)
+  // ACTIONS
+  this.inputManager.on("insert",      this.insert.bind(     this));	// put text in
+  this.inputManager.on("restart",     this.restart.bind(    this));	// clear the puzzle
+  this.inputManager.on("solve",       this.solve.bind(      this));	// give up and show solution
+  this.inputManager.on("keepPlaying", this.keepPlaying.bind(this));	// ? (2048 legacy)
 
   this.setup();
 }

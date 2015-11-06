@@ -3,6 +3,15 @@
  * 
  * much lifted from python an5 (June 2015) of netbook crossword tools
  * 
+ * note - NO html in this layet - presentation is all added in separate module
+ * 
+ * 
+ * Three classes defined here -
+ * 	xwdCell		single square of grid
+ * 	xwdSpot		row of adjacent cells (horizontal or vertical)
+ * 	xwdClue		clue describing content of a spot or series of spots
+ * 	Crossword	the whole shebang
+ * 
  */
 // Parameters
 
@@ -77,7 +86,8 @@ function xwdSpot( cells ) {
 xwdSpot.prototype.updateDisplay = function() {
   this.display = this.label[ 1 ] + " " + shortDirectionNames[ this.label[ 0 ] ];
 }
-    function xwdClue( spots , str , punctuation ) {
+
+function xwdClue( spots , str , punctuation , solution ) {
     // A clue is a textual clue (str) for a sequence of spots (usually only one)
     // punctuation is an optional string giving the break up into lengths of
     // the words of the answer, along with punctuation clues.
@@ -97,11 +107,12 @@ xwdSpot.prototype.updateDisplay = function() {
 	punctuation = lengths.join( extraCommas ? "," : " " );
     }
     this.punctuation = punctuation;
+    this.solution = solution; 
     // Construct the display version
     this.updateDisplay();
 }
 
-    xwdClue.prototype.updateDisplay = function() {
+xwdClue.prototype.updateDisplay = function() {
     // should be called after any changes to component parts
     if ( this.spots.length == 1 ) {
 	this.display = this.spots[ 0 ].label[ 1 ] + "." ;
@@ -118,7 +129,7 @@ xwdSpot.prototype.updateDisplay = function() {
 };
 
 
-    function xwdContentChar( cont ) {
+function xwdContentChar( cont ) {
     // What to display ( in one character ) for a given set of possibilities
     // cont is a set of [ letter , ... ] lists 
     l = cont.length
@@ -128,7 +139,7 @@ xwdSpot.prototype.updateDisplay = function() {
     return cWilds[ l - 1 ];
 }
 
-    function xwdShowLabel( lbl , short ) {
+function xwdShowLabel( lbl , short ) {
     return ( short ? shortDirectionNames : directionNames ) [ lbl[ 0 ] ] + ' ' + lbl[ 1 ];
 }
 
@@ -138,37 +149,11 @@ function Crossword( gridRows , clues ) {
     * gridRows is an array of strings representing rows of the solved crossword,
     * 	using spaces for the empty cells if a solution is not being given.
     * 
-    * clues is an array of triples:  [ spots , clue , solution, lengths  ]
+    * clues (as passed) is array of strings, giving clues in a fairly normal
+    * 		human-readable format
     * 
-    * 	where each
-    * 		
-    * 		spots	is a (usually singleton) list of pairs:  [ direction , label ]
-    * 				where direction is 0=Across 1=Down,
-    * 				label is label of head cell - may be number or text
+    * this.clues will be an array of xwdClue objects
     * 
-    * 		clue	is main text of clue
-    * 
-    * 		solution is optional - spaces and punctuation may be inserted
-    * 			making lengths obsolete
-    * 
-    * 		lengths is optional text description of length break-up and punctuation,
-    * 			to be put in () after the clue. If omitted, it is inferred from
-    *			solution, if available, or just the length(s) of the spot(s) is used.
-    * 
-    * 	e.g.	[ [ [ 0 , 5 ] , [ 1 , 6 ] ] , "Game lolly digit" , "TIC-TAC-TOE" ]
-    * 
-    * 	would represent the clue we'd normally see as...
-    * 
-    * 		Across
-    * 		...
-    * 		5, 6 dn. Game lolly digit (3-3-3)
-    * 
-    * 	In the absence of a solution, we would specify the lengths / punctuation:
-    * 
-    * 		[ [ [ 0 , 5 ] , [ 1 , 6 ] ] , "Game lolly digit" , null , "3-3-3" ]
-    * 
-    * 	This is also done if the solution is to be inferred from a whole-grid solution -
-    * 		the lengths field will be used to punctuate the solution
     */
     this.readGrid( gridRows );
 
