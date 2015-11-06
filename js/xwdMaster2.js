@@ -33,7 +33,7 @@ document.write( '\
 
 include(
   "js/xwd.js" , "js/xwd_polyfills.js" , "js/keyboard_input_manager.js" ,
-  "js/html_actuator.js" , "js/grid.js" , "js/tile.js" ,
+  "js/xwd_actuator.js" , "js/grid.js" , "js/tile.js" ,
   "js/local_storage_manager.js" , "js/xwdInterface.js" , "js/xwdGo.js" );
 
 stdHtml = '\
@@ -55,12 +55,11 @@ stdHtml = '\
       <td class="side-bar">\
 	<div class="heading">\
 	  <h1 id="title">' + xwdPuzzleName + '</h1>\
-	  <div class="scores-container">\
-	    <div class="score-container">0</div>\
-	    <div class="best-container">0</div>\
-	  </div>\
 	</div>\
 	<p class="game-intro"></p>\
+	<a class="restart-button">Clear grid</a>\
+	<a class="restart-button">Clear grid</a>\
+	<a class="restart-button">Clear grid</a>\
 	<a class="restart-button">Clear grid</a>\
 	<p class="game-explanation"> \
 	</p>\

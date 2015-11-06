@@ -177,10 +177,18 @@ xwdInterface.prototype.goto = function( destination ) {
     var destY = parseInt( destination.slice(3,5) - 1 );
     var destD = parseInt( destination.slice(6,7) );
 //     alert("Going to "+destX + "," + destY + "," + destD);
-    var cell = this.xwd.cells2[ destY ][ destX ];
-    this.moveCursorToCell( cell , destD ? ( destD - 1 ) : 
-	    ( ( this.cursorSpot && this.cursorSpot.label[ 0 ] ) || 0 ) );
+    if ( destX * destY ) {
+	var cell = this.xwd.cells2[ destY ][ destX ];
+// 	catch ( e ) { alert(destination) }
+	this.moveCursorToCell( cell , destD ? ( destD - 1 ) : 
+		( ( this.cursorSpot && this.cursorSpot.label[ 0 ] ) || 0 ) );
+    }
+    else {
+	this.cursorCell = null;
+	this.cursorSpot = null;
+    }
     this.actuate();
+	
 };
 xwdInterface.prototype.moveCursorToCell = function ( cell , d ) {
     if ( cell ) {
