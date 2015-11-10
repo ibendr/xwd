@@ -32,9 +32,9 @@ document.write( '\
   ');
 
 include(
-  "js/xwd.js" , "js/xwd_polyfills.js" , "js/keyboard_input_manager.js" ,
+  "js/xwd.js" , "js/xwd_polyfills.js" , "js/xwdEventManager.js" ,
   "js/xwd_actuator.js" , "js/grid.js" , "js/tile.js" ,
-  "js/local_storage_manager.js" , "js/xwdInterface.js" , "js/xwdGo.js" );
+  "js/local_storage_manager.js" , "js/xwdInterface2.js" , "js/xwdGo.js" );
 
 stdHtml = '\
   <table class="layout">\
