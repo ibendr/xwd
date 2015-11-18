@@ -27,8 +27,7 @@ document.write( '\
   <head>\
     <title>' + xwdPuzzleName + '</title>\
   </head><body>\
-  <link href="style/main.css" rel="stylesheet" type="text/css">\
-  <link href = "style/xwd-grid15.css" rel="stylesheet" type="text/css">\
+  <link href="style/xwdMain.css" rel="stylesheet" type="text/css">\
   ');
 
 include(
@@ -59,7 +58,7 @@ stdHtml = '\
 	<p class="game-intro"></p>\
 	<a class="restart-button">Clear grid</a>\
 	<a class="solution-button">Show solution</a>\
-	<a class="cheat-button">Cheat (show word) grid</a>\
+	<a class="cheat-button">Cheat (show word)</a>\
 	<a class="check-button">Check progress</a>\
 	<p class="game-explanation"> \
 	</p>\
